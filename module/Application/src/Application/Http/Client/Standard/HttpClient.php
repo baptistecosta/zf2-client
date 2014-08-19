@@ -3,8 +3,7 @@
 namespace Application\Http\Client\Standard;
 
 
-use Application\Http\Service\AbstractHttpClient;
-use Zend\Http\Response;
+use Application\Http\Client\AbstractHttpClient;
 
 class HttpClient extends AbstractHttpClient {
 
