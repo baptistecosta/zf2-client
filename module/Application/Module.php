@@ -7,14 +7,27 @@ use Zend\ModuleManager\Feature\AutoloaderProviderInterface;
 use Zend\ModuleManager\Feature\BootstrapListenerInterface;
 use Zend\ModuleManager\Feature\ConfigProviderInterface;
 use Zend\ModuleManager\Feature\ControllerProviderInterface;
+use Zend\Mvc\Application;
 use Zend\Mvc\ModuleRouteListener;
+use Zend\ServiceManager\ServiceManager;
 
 class Module implements BootstrapListenerInterface, ConfigProviderInterface, AutoloaderProviderInterface, ControllerProviderInterface {
 
 	public function onBootstrap(EventInterface $e) {
-		$eventManager = $e->getApplication()->getEventManager();
+		/** @var $application Application */
+		$application = $e->getApplication();
+
+		/** @var $services ServiceManager */
+		$services = $application->getServiceManager();
+
+		$eventManager = $application->getEventManager();
 		$moduleRouteListener = new ModuleRouteListener();
 		$moduleRouteListener->attach($eventManager);
+
+		$httpService = $services->get('http-service');
+		$httpServiceListener = $services->get('Application\\Http\\HttpServiceListener');
+		$httpServiceListener->setMvcEvent($e);
+		$httpServiceListener->attach($httpService->getEventManager());
 	}
 
 	public function getConfig() {
@@ -35,10 +48,8 @@ class Module implements BootstrapListenerInterface, ConfigProviderInterface, Aut
 	public function getControllerConfig() {
 		return [
 			'invokables' => [
-				'Application\\Controller\\Index' => 'Application\\Controller\\IndexController'
-			],
-			'factories' => [
-//				'Application\\Controller\\Index' => 'Application\\Controller\\IndexControllerFactory',
+				'Application\\Controller\\Auth' => 'Application\\Controller\\AuthController',
+				'Application\\Controller\\Index' => 'Application\\Controller\\IndexController',
 			],
 			'initializers' => [
 				'Application\\Session\\Container\\SessionIdentityInitializer',

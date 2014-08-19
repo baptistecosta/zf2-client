@@ -1,74 +1,94 @@
 <?php
-/**
- * Zend Framework (http://framework.zend.com/)
- *
- * @link      http://github.com/zendframework/ZendSkeletonApplication for the canonical source repository
- * @copyright Copyright (c) 2005-2014 Zend Technologies USA Inc. (http://www.zend.com)
- * @license   http://framework.zend.com/license/new-bsd New BSD License
- */
 
-return array(
-	'router' => array(
-		'routes' => array(
-			'home' => array(
+return [
+	'router' => [
+		'routes' => [
+			'home' => [
 				'type' => 'Zend\Mvc\Router\Http\Literal',
-				'options' => array(
+				'options' => [
 					'route' => '/',
-					'defaults' => array(
+					'defaults' => [
 						'controller' => 'Application\Controller\Index',
 						'action' => 'index',
-					),
-				),
-			),
-			// The following is a route to simplify getting started creating
-			// new controllers and actions without needing to create a new
-			// module. Simply drop new controllers in, and you can access them
-			// using the path /application/:controller/:action
-			'application' => array(
+					],
+				],
+			],
+			'application' => [
 				'type' => 'Literal',
-				'options' => array(
+				'options' => [
 					'route' => '/application',
-					'defaults' => array(
+					'defaults' => [
 						'__NAMESPACE__' => 'Application\Controller',
 						'controller' => 'Index',
 						'action' => 'index',
-					),
-				),
+					],
+				],
 				'may_terminate' => true,
-				'child_routes' => array(
-					'default' => array(
+				'child_routes' => [
+					'default' => [
 						'type' => 'Segment',
-						'options' => array(
+						'options' => [
 							'route' => '/[:controller[/:action]]',
-							'constraints' => array(
+							'constraints' => [
 								'controller' => '[a-zA-Z][a-zA-Z0-9_-]*',
 								'action' => '[a-zA-Z][a-zA-Z0-9_-]*',
-							),
-							'defaults' => array(),
-						),
-					),
-				),
-			),
-		),
-	),
+							],
+							'defaults' => [],
+						],
+					],
+				],
+			],
+			'auth' => [
+				'type' => 'Literal',
+				'options' => [
+					'route' => '/auth',
+					'defaults' => [
+						'__NAMESPACE__' => 'Application\Controller',
+						'controller' => 'Auth',
+						'action' => 'signIn',
+					],
+				],
+				'may_terminate' => true,
+				'child_routes' => [
+					'default' => [
+						'type' => 'Segment',
+						'options' => [
+							'route' => '[/:action]',
+							'constraints' => [
+								'action' => '[a-zA-Z][a-zA-Z0-9_-]*',
+							],
+							'defaults' => [],
+						],
+					],
+				],
+			],
+		],
+	],
 	'service_manager' => [
 		'abstract_factories' => [
 			'Zend\\Cache\\Service\\StorageCacheAbstractServiceFactory',
 			'Zend\\Log\\LoggerAbstractServiceFactory',
-			'Application\\Http\\Client\\AbstractHttpClientServiceFactory',
 		],
 		'aliases' => [
+			'http-service' => 'Application\\Http\\HttpService',
 			'translator' => 'MvcTranslator',
 		],
 		'factories' => [
-			'Application\\Http\\Client\\Standard' => 'Application\\Http\\Client\\Standard\\HttpClientFactory',
-			'Application\\Http\\Client\\Token' => 'Application\\Http\\Client\\Token\\HttpClientFactory',
 			'Identity' => function () {
 					return new \Zend\Session\Container('sfa\zf2client');
-				}
+				},
+			'Application\\Http\\HttpService' => function($sm) {
+					$client = new Zend\Http\Client();
+					$client->setAdapter('Zend\\Http\\Client\\Adapter\\Curl');
+
+					$clientService = new \Application\Http\HttpService();
+					return $clientService
+						->setBaseUrl('http://apigility.loc')
+						->setClient($client);
+				},
 		],
 		'invokables' => [
-			//
+			'Application\\Http\\HttpServiceListener' => 'Application\\Http\\HttpServiceListener'
 		],
 		'initializers' => [
 			'Application\\Session\\Container\\SessionIdentityInitializer'
@@ -106,4 +126,4 @@ return array(
 			'routes' => array(),
 		),
 	),
-);
+];

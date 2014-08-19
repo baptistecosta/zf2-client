@@ -1,0 +1,24 @@
+<h1>Sign in</h1>
+<?php
+$this->form->setAttribute('action', '/auth/sign-in');
+$this->form->prepare();
+echo $this->form()->openTag($this->form);
+?>
+<div class="row">
+	<div class="form-group col-lg-4">
+		<?= $this->formRow($this->form->get('username')); ?>
+	</div>
+</div>
+<div class="row">
+	<div class="form-group col-lg-4">
+		<?= $this->formRow($this->form->get('password')); ?>
+	</div>
+</div>
+<div class="row">
+	<div class="form-group col-lg-4">
+		<?= $this->formSubmit($this->form->get('submit')); ?>
+	</div>
+</div>
+<div>
+	<?= $this->form()->closeTag(); ?>
+</div>
