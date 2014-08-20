@@ -15,7 +15,7 @@ class SessionIdentityInitializer implements InitializerInterface {
 
 	public function initialize($instance, ServiceLocatorInterface $serviceLocator) {
 		if ($instance instanceof AbstractActionController && $instance instanceof SessionIdentityAwareInterface) {
-			$identity = $serviceLocator->getServiceLocator()->get('identity');;
+			$identity = $serviceLocator->getServiceLocator()->get('identity');
 		} else if ($instance instanceof SessionIdentityAwareInterface) {
 			$identity = $serviceLocator->get('identity');
 		}

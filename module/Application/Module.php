@@ -3,6 +3,7 @@
 namespace Application;
 
 use Zend\EventManager\EventInterface;
+use Zend\EventManager\EventManager;
 use Zend\ModuleManager\Feature\AutoloaderProviderInterface;
 use Zend\ModuleManager\Feature\BootstrapListenerInterface;
 use Zend\ModuleManager\Feature\ConfigProviderInterface;
@@ -24,10 +25,17 @@ class Module implements BootstrapListenerInterface, ConfigProviderInterface, Aut
 		$moduleRouteListener = new ModuleRouteListener();
 		$moduleRouteListener->attach($eventManager);
 
-		$httpService = $services->get('http-service');
-		$httpServiceListener = $services->get('Application\\Http\\HttpServiceListener');
-		$httpServiceListener->setMvcEvent($e);
-		$httpServiceListener->attach($httpService->getEventManager());
+		/** @var $apiClientEventManager EventManager */
+		$apiClientEventManager = $services->get('api-client')->getEventManager();
+		$apiClientEventManager->attachAggregate($services->get('Application\\Http\\Client\\ApiListener'));
+
+		/** @var $apiResponseHandlerEventManager EventManager */
+		$apiResponseHandlerEventManager = $services->get('Application\\Http\\Response\\ApiResponseHandler')->getEventManager();
+		$apiResponseHandlerEventManager->attachAggregate($services->get('Application\\Http\\Response\\Listener\\ClientError'));
+		$apiResponseHandlerEventManager->attachAggregate($services->get('Application\\Http\\Response\\Listener\\Forbidden'));
+		$apiResponseHandlerEventManager->attachAggregate($services->get('Application\\Http\\Response\\Listener\\NotFound'));
+		$apiResponseHandlerEventManager->attachAggregate($services->get('Application\\Http\\Response\\Listener\\Redirect'));
+		$apiResponseHandlerEventManager->attachAggregate($services->get('Application\\Http\\Response\\Listener\\ServerError'));
 	}
 
 	public function getConfig() {

@@ -38,6 +38,17 @@ return [
 					],
 				],
 			],
+			'sign-in' => [
+				'type' => 'Literal',
+				'options' => [
+					'route' => '/sign-in',
+					'defaults' => [
+						'__NAMESPACE__' => 'Application\Controller',
+						'controller' => 'Auth',
+						'action' => 'signIn',
+					],
+				],
+			],
 			'auth' => [
 				'type' => 'Literal',
 				'options' => [
@@ -68,27 +79,26 @@ return [
 		'abstract_factories' => [
 			'Zend\\Cache\\Service\\StorageCacheAbstractServiceFactory',
 			'Zend\\Log\\LoggerAbstractServiceFactory',
+			'Application\\Resource\\AbstractMapperFactory'
 		],
 		'aliases' => [
-			'http-service' => 'Application\\Http\\HttpService',
+			'identity' => 'Application\\Session\\Container\\SessionIdentity',
+			'api-client' => 'Application\\Http\\Client\\ApiClient',
 			'translator' => 'MvcTranslator',
 		],
 		'factories' => [
-			'Identity' => function () {
-					return new \Zend\Session\Container('sfa\zf2client');
-				},
-			'Application\\Http\\HttpService' => function($sm) {
-					$client = new Zend\Http\Client();
-					$client->setAdapter('Zend\\Http\\Client\\Adapter\\Curl');
-
-					$clientService = new \Application\Http\HttpService();
-					return $clientService
-						->setBaseUrl('http://apigility.loc')
-						->setClient($client);
-				},
+			'Application\\Session\\Container\\SessionIdentity' => 'Application\\Session\\Container\\SessionIdentityFactory',
+			'Application\\Http\\Client\\ApiClient' => 'Application\\Http\\Client\\ApiClientFactory',
 		],
 		'invokables' => [
-			'Application\\Http\\HttpServiceListener' => 'Application\\Http\\HttpServiceListener'
+			'Application\\Http\\Client\\ApiListener' => 'Application\\Http\\Client\\ApiClientListener',
+			'Application\\Session\\Container\\IdentityListener' => 'Application\\Session\\Container\\SessionIdentityListener',
+			'Application\\Http\\Response\\ApiResponseHandler' => 'Application\\Http\\Response\\ApiResponseHandler',
+			'Application\\Http\\Response\\Listener\\ClientError' => 'Application\\Http\\Response\\Listener\\ClientErrorListener',
+			'Application\\Http\\Response\\Listener\\Forbidden' => 'Application\\Http\\Response\\Listener\\ForbiddenListener',
+			'Application\\Http\\Response\\Listener\\NotFound' => 'Application\\Http\\Response\\Listener\\NotFoundListener',
+			'Application\\Http\\Response\\Listener\\Redirect' => 'Application\\Http\\Response\\Listener\\RedirectListener',
+			'Application\\Http\\Response\\Listener\\ServerError' => 'Application\\Http\\Response\\Listener\\ServerErrorListener',
 		],
 		'initializers' => [
 			'Application\\Session\\Container\\SessionIdentityInitializer'

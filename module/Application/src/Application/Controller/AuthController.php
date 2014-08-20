@@ -5,15 +5,19 @@ namespace Application\Controller;
 
 use Application\Filter\Auth\SignInFilter;
 use Application\Form\Auth\SignInForm;
-use Application\Http\HttpServiceAwareTrait;
+use Application\Http\Client\ApiClientAwareTrait;
+use Application\Resource\Auth\AuthMapper;
 use Application\Session\Container\SessionIdentityAwareInterface;
 use Application\Session\Container\SessionIdentityAwareTrait;
-use Zend\Mvc\Controller\AbstractActionController;
 use Zend\View\Model\ViewModel;
 
-class AuthController extends AbstractActionController implements SessionIdentityAwareInterface {
+/**
+ * Class AuthController
+ * @package Application\Controller
+ */
+class AuthController extends AbstractApplicationController implements SessionIdentityAwareInterface {
 
-	use HttpServiceAwareTrait;
+	use ApiClientAwareTrait;
 	use SessionIdentityAwareTrait;
 
 	public function signInAction() {
@@ -26,7 +30,22 @@ class AuthController extends AbstractActionController implements SessionIdentity
 
 			if ($form->isValid()) {
 				$data = $form->getData();
-				$this->getHttpService()->requestToken($data['username'], $data['password']);
+
+				/** @var $authMapper AuthMapper */
+				$authMapper = $this->getServiceLocator()->get('Application\\Resource\\Auth\\AuthMapper');
+
+				$apiResponse = $authMapper->requestToken($data['username'], $data['password']);
+				$body = json_decode($apiResponse->getBody(), true);
+
+				if ($apiResponse->isSuccess()) {
+					$this->getIdentity()->offsetSet('tokenData', $body);
+					$this->flashMessenger()->setNamespace('success')->addMessage('You are now logged in.');
+					return $this->redirect()->toRoute('home');
+				} else if ($apiResponse->isClientError()) {
+					$this->getIdentity()->offsetUnset('tokenData');
+					$this->flashMessenger()->setNamespace('error')->addMessage($body['detail']);
+					return $this->redirect()->toRoute('auth');
+				}
 			}
 		}
 		return new ViewModel([
@@ -35,8 +54,8 @@ class AuthController extends AbstractActionController implements SessionIdentity
 	}
 
 	public function signOutAction() {
-		$this->getIdentity()->offsetUnset('accessToken');
-		$this->getIdentity()->offsetUnset('refreshToken');
+		$this->getIdentity()->offsetUnset('tokenData');
+		$this->flashMessenger()->setNamespace('success')->addMessage('You have been logged out.');
 		return $this->redirect()->toRoute('home');
 	}
 } 
