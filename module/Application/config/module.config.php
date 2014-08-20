@@ -73,6 +73,30 @@ return [
 					],
 				],
 			],
+			'artist' => [
+				'type' => 'Literal',
+				'options' => [
+					'route' => '/artist',
+					'defaults' => [
+						'__NAMESPACE__' => 'Application\Controller',
+						'controller' => 'Artist',
+						'action' => 'index',
+					],
+				],
+				'may_terminate' => true,
+				'child_routes' => [
+					'default' => [
+						'type' => 'Segment',
+						'options' => [
+							'route' => '[/:action]',
+							'constraints' => [
+								'action' => '[a-zA-Z][a-zA-Z0-9_-]*',
+							],
+							'defaults' => [],
+						],
+					],
+				],
+			],
 		],
 	],
 	'service_manager' => [

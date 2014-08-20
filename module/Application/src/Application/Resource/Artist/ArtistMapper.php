@@ -23,7 +23,8 @@ class ArtistMapper extends AbstractMapper {
 	}
 
 	public function getAll() {
-
+		$response = $this->getApiClient()->get('/artist');
+		return json_decode($response->getBody(), true);
 	}
 
 	public function delete() {

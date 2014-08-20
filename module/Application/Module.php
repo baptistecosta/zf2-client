@@ -58,6 +58,7 @@ class Module implements BootstrapListenerInterface, ConfigProviderInterface, Aut
 			'invokables' => [
 				'Application\\Controller\\Auth' => 'Application\\Controller\\AuthController',
 				'Application\\Controller\\Index' => 'Application\\Controller\\IndexController',
+				'Application\\Controller\\Artist' => 'Application\\Controller\\ArtistController',
 			],
 			'initializers' => [
 				'Application\\Session\\Container\\SessionIdentityInitializer',
