@@ -8,9 +8,11 @@ use Application\Session\Container\SessionIdentityAwareTrait;
 use Zend\EventManager\EventManagerAwareInterface;
 use Zend\EventManager\EventManagerAwareTrait;
 use Zend\Http\Client;
+use Zend\Http\Request;
 use Zend\Http\Response;
 use Zend\ServiceManager\ServiceLocatorAwareInterface;
 use Zend\ServiceManager\ServiceLocatorAwareTrait;
+use Zend\Stdlib\Parameters;
 
 /**
  * Class ApiClient
@@ -21,6 +23,9 @@ class ApiClient implements ServiceLocatorAwareInterface, SessionIdentityAwareInt
 	use EventManagerAwareTrait;
 	use ServiceLocatorAwareTrait;
 	use SessionIdentityAwareTrait;
+
+	const EVENT_REQUEST_PRE = 'request.pre';
+	const EVENT_REQUEST_POST = 'request.post';
 
 	const CLIENT_ID = 'sefaireaider-website';
 	const CLIENT_SECRET = '{7W5Vy?rxT;Ax9b';
@@ -54,26 +59,31 @@ class ApiClient implements ServiceLocatorAwareInterface, SessionIdentityAwareInt
 	}
 
 	/**
-	 * @param $uri
-	 * @param string $method
-	 * @param array $params
-	 * @return mixed
+	 * @param $resource
+	 * @param array $settings
+	 * @return Response
 	 */
-	public function doRequest($uri, $method = 'GET', $params = []) {
-		$headers = ['Accept' => 'application/json'];
-		if ($this->getIdentity()->offsetExists('tokenData')) {
-			$tokenData = $this->getIdentity()->offsetGet('tokenData');
-			$headers['Authorization'] = 'Bearer ' . $tokenData['access_token'];
+	public function request($resource, $settings = []) {
+		$apiRequest = new Request();
+		$apiRequest->setUri($this->baseUrl . $resource);
+		$apiRequest->setMethod(empty($settings['method']) ? 'GET' : $settings['method']);
+		if (!empty($settings['headers'])) {
+			$apiRequest->setHeaders($settings['headers']);
+		}
+		if (!empty($settings['query'])) {
+			$params = new Parameters($settings['query']);
+			$apiRequest->setQuery($params);
+		}
+		if (!empty($settings['post'])) {
+			$apiRequest->setPost($settings['post']);
 		}
 
-		$apiResponse = $this->client
-			->setUri($this->baseUrl . $uri)
-			->setMethod($method)
-			->setHeaders($headers)
-			->setParameterPost($params)
-			->send();
+		$this->getEventManager()->trigger(self::EVENT_REQUEST_PRE, $this, ['apiRequest' => $apiRequest]);
 
-		return $this->getEventManager()->trigger('do-request.post', $this, ['apiResponse' => $apiResponse])->last();
+		$apiResponse = $this->client->send($apiRequest);
+
+		$this->getEventManager()->trigger(self::EVENT_REQUEST_POST, $this, ['apiResponse' => $apiResponse]);
+		return $apiResponse;
 	}
 
 	/**
@@ -104,53 +114,62 @@ class ApiClient implements ServiceLocatorAwareInterface, SessionIdentityAwareInt
 	 * GET request.
 	 *
 	 * @param $uri
-	 * @return mixed
+	 * @param $settings
+	 * @return \Zend\Http\Response
 	 */
-	public function get($uri) {
-		return $this->doRequest($uri, 'GET');
+	public function get($uri, $settings = []) {
+		return $this->request($uri, $settings);
 	}
 
 	/**
 	 * POST request.
 	 *
 	 * @param $uri
-	 * @param $params
-	 * @return mixed
+	 * @param $settings
+	 * @return Response
 	 */
-	public function post($uri, $params) {
-		return $this->doRequest($uri, 'POST', $params);
+	public function post($uri, $settings = []) {
+		return $this->request($uri, array_merge([
+			'method' => 'POST'
+		], $settings));
 	}
 
 	/**
 	 * PUT request.
 	 *
 	 * @param $uri
-	 * @param $params
+	 * @param $settings
 	 * @return mixed
 	 */
-	public function put($uri, $params) {
-		return $this->doRequest($uri, 'PUT', $params);
+	public function put($uri, $settings = []) {
+		return $this->request($uri, array_merge([
+			'method' => 'PUT'
+		], $settings));
 	}
 
 	/**
 	 * PATCH request.
 	 *
 	 * @param $uri
-	 * @param $params
+	 * @param $settings
 	 * @return mixed
 	 */
-	public function patch($uri, $params) {
-		return $this->doRequest($uri, 'PATCH', $params);
+	public function patch($uri, $settings = []) {
+		return $this->request($uri, array_merge([
+			'method' => 'PATCH'
+		], $settings));
 	}
 
 	/**
 	 * DELETE request.
 	 *
 	 * @param $uri
-	 * @param $params
+	 * @param $settings
 	 * @return mixed
 	 */
-	public function delete($uri, $params) {
-		return $this->doRequest($uri, 'DELETE', $params);
+	public function delete($uri, $settings = []) {
+		return $this->request($uri, array_merge([
+			'method' => 'DELETE'
+		], $settings));
 	}
 }

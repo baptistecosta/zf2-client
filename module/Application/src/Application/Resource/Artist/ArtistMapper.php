@@ -4,6 +4,7 @@ namespace Application\Resource\Artist;
 
 
 use Application\Http\Client\ApiClientAwareTrait;
+use Application\Paginator\Adapter\ApigilityAdapterInterface;
 use Application\Resource\AbstractMapper;
 use Zend\Http\Response;
 
@@ -11,7 +12,7 @@ use Zend\Http\Response;
  * Class ArtistMapper
  * @package Application\Resource\Artist
  */
-class ArtistMapper extends AbstractMapper {
+class ArtistMapper extends AbstractMapper implements ApigilityAdapterInterface {
 
 	/**
 	 * @param $id
@@ -22,8 +23,14 @@ class ArtistMapper extends AbstractMapper {
 		return json_decode($response->getBody(), true);
 	}
 
-	public function getAll() {
-		$response = $this->getApiClient()->get('/artist');
+	public function getAll($page, $size) {
+		$api = $this->getApiClient();
+		$response = $api->get('/artist', [
+			'query' => [
+				'page' => $page,
+				'page_size' => $size
+			]
+		]);
 		return json_decode($response->getBody(), true);
 	}
 
