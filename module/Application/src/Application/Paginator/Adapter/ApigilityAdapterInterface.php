@@ -8,7 +8,12 @@
 
 namespace Application\Paginator\Adapter;
 
-
+/**
+ * Interface ApigilityAdapterInterface
+ * @package Application\Paginator\Adapter
+ *
+ * @deprecated
+ */
 interface ApigilityAdapterInterface {
 
 	public function getAll($page, $size);

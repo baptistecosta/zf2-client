@@ -18,7 +18,13 @@ class ArtistController extends AbstractActionController {
 		$page = $this->params()->fromQuery('page', 1);
 		$size = $this->params()->fromQuery('page_size', 5);
 
-		$artistData = $this->getArtistMapper()->getAll($page, $size);
+//		$paginator = $this->getArtistMapper()->getAll($page, $size);
+//		$paginator->setCurrentPageNumber((int)$page);
+//		$paginator->setItemCountPerPage($size);
+
+		$paginator = $this->getArtistMapper()->getAll($page, $size);
+		$paginator->setPage((int)$page);
+		$paginator->setItemCountPerPage($size);
 
 
 //		$apigilityAdapter = new ApigilityAdapter($this->getArtistMapper());
@@ -26,7 +32,8 @@ class ArtistController extends AbstractActionController {
 
 
 		return new ViewModel([
-			'artists' => $artistData,
+//			'artists' => $artistData,
+			'paginator' => $paginator,
 		]);
 	}
 

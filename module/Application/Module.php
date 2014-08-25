@@ -8,11 +8,12 @@ use Zend\ModuleManager\Feature\AutoloaderProviderInterface;
 use Zend\ModuleManager\Feature\BootstrapListenerInterface;
 use Zend\ModuleManager\Feature\ConfigProviderInterface;
 use Zend\ModuleManager\Feature\ControllerProviderInterface;
+use Zend\ModuleManager\Feature\ViewHelperProviderInterface;
 use Zend\Mvc\Application;
 use Zend\Mvc\ModuleRouteListener;
 use Zend\ServiceManager\ServiceManager;
 
-class Module implements BootstrapListenerInterface, ConfigProviderInterface, AutoloaderProviderInterface, ControllerProviderInterface {
+class Module implements BootstrapListenerInterface, ConfigProviderInterface, AutoloaderProviderInterface, ControllerProviderInterface, ViewHelperProviderInterface {
 
 	public function onBootstrap(EventInterface $e) {
 		/** @var $application Application */
@@ -62,6 +63,20 @@ class Module implements BootstrapListenerInterface, ConfigProviderInterface, Aut
 			],
 			'initializers' => [
 				'Application\\Session\\Container\\SessionIdentityInitializer',
+			]
+		];
+	}
+
+	/**
+	 * Expected to return \Zend\ServiceManager\Config object or array to
+	 * seed such an object.
+	 *
+	 * @return array|\Zend\ServiceManager\Config
+	 */
+	public function getViewHelperConfig() {
+		return [
+			'invokables' => [
+				'apigilityPaginationControl' => 'Application\\View\\Helper\\ApigilityPaginationControl'
 			]
 		];
 	}

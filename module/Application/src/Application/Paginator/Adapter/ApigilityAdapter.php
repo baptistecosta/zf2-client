@@ -3,28 +3,48 @@
 namespace Application\Paginator\Adapter;
 
 
+use Application\Http\Client\ApiClient;
 use Zend\Paginator\Adapter\AdapterInterface;
 
 class ApigilityAdapter implements AdapterInterface {
 
 	/**
-	 * @var $dataMapper
+	 * @var $client ApiClient
 	 */
-	protected $dataMapper;
+	protected $client;
 
-	function __construct(ApigilityAdapterInterface $dataMapper) {
-		$this->$dataMapper = $dataMapper;
+	protected $items;
+
+	protected $totalItems = 0;
+
+	protected $pageCount = 0;
+
+	function __construct(ApiClient $client) {
+		$this->client = $client;
 	}
 
 	/**
 	 * Returns a collection of items for a page.
 	 *
-	 * @param  int $offset Page offset
+	 * @param  int $page Page offset
 	 * @param  int $itemCountPerPage Number of items per page
 	 * @return array
 	 */
-	public function getItems($offset, $itemCountPerPage) {
-		$this->dataMapper->getAll($offset, $itemCountPerPage);
+	public function getItems($page, $itemCountPerPage) {
+//		$page = $this->getPage($page, $itemCountPerPage);
+		$response = $this->client->get('/artist', [
+			'query' => [
+				'page' => $page,
+				'page_size' => $itemCountPerPage
+			]
+		]);
+		$body = json_decode($response->getBody(), true);
+
+		$this->items = current($body['_embedded']);
+		$this->totalItems = $body['total_items'];
+		$this->pageCount = $body['page_count'];
+
+		return $this->items;
 	}
 
 	/**
@@ -37,6 +57,19 @@ class ApigilityAdapter implements AdapterInterface {
 	 * The return value is cast to an integer.
 	 */
 	public function count() {
-
+		return $this->totalItems;
+//		return 5;
 	}
+
+	public function getPageCount() {
+		return $this->pageCount;
+	}
+
+	public function getCurrentItemCount() {
+		return count($this->items);
+	}
+
+//	protected function getPage($offset, $itemCountPerPage) {
+//		return floor(($offset / $itemCountPerPage) + 1);
+//	}
 }

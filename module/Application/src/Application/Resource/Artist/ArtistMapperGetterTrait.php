@@ -16,4 +16,4 @@ trait ArtistMapperGetterTrait {
 	public function getArtistMapper() {
 		return $this->getServiceLocator()->get('Application\\Resource\\Artist\\ArtistMapper');
 	}
-} 
+}
