@@ -4,6 +4,7 @@ namespace Application\Resource;
 
 
 use Application\Http\Client\ApiClientAwareTrait;
+use Application\Http\Request\RequestManagerGetterTrait;
 use Zend\EventManager\EventManagerAwareInterface;
 use Zend\EventManager\EventManagerAwareTrait;
 use Zend\ServiceManager\ServiceLocatorAwareInterface;
@@ -17,5 +18,6 @@ abstract class AbstractMapper implements ServiceLocatorAwareInterface, EventMana
 
 	use ApiClientAwareTrait;
 	use EventManagerAwareTrait;
+	use RequestManagerGetterTrait;
 	use ServiceLocatorAwareTrait;
 }

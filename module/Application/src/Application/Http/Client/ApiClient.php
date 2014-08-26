@@ -12,7 +12,6 @@ use Zend\Http\Request;
 use Zend\Http\Response;
 use Zend\ServiceManager\ServiceLocatorAwareInterface;
 use Zend\ServiceManager\ServiceLocatorAwareTrait;
-use Zend\Stdlib\Parameters;
 
 /**
  * Class ApiClient
@@ -36,11 +35,6 @@ class ApiClient implements ServiceLocatorAwareInterface, SessionIdentityAwareInt
 	protected $client;
 
 	/**
-	 * @var $baseUrl
-	 */
-	protected $baseUrl;
-
-	/**
 	 * @param Client $client
 	 * @return $this
 	 */
@@ -49,128 +43,12 @@ class ApiClient implements ServiceLocatorAwareInterface, SessionIdentityAwareInt
 		return $this;
 	}
 
-	/**
-	 * @param mixed $baseUrl
-	 * @return $this
-	 */
-	public function setBaseUrl($baseUrl) {
-		$this->baseUrl = $baseUrl;
-		return $this;
-	}
-
-	/**
-	 * @param $resource
-	 * @param array $settings
-	 * @return Response
-	 */
-	public function request($resource, $settings = []) {
-		$apiRequest = new Request();
-		$apiRequest->setUri($this->baseUrl . $resource);
-		$apiRequest->setMethod(empty($settings['method']) ? 'GET' : $settings['method']);
-		if (!empty($settings['headers'])) {
-			$apiRequest->setHeaders($settings['headers']);
+	public function send(Request $request, $triggerPreEvent = true) {
+		if ($triggerPreEvent) {
+			$this->getEventManager()->trigger(self::EVENT_REQUEST_PRE, $this, ['apiRequest' => $request]);
 		}
-		if (!empty($settings['query'])) {
-			$params = new Parameters($settings['query']);
-			$apiRequest->setQuery($params);
-		}
-		if (!empty($settings['post'])) {
-			$apiRequest->setPost($settings['post']);
-		}
-		return $this->send($apiRequest);
-	}
-
-	public function send(Request $request) {
-		$this->getEventManager()->trigger(self::EVENT_REQUEST_PRE, $this, ['apiRequest' => $request]);
 		$apiResponse = $this->client->send($request);
 		$this->getEventManager()->trigger(self::EVENT_REQUEST_POST, $this, ['apiResponse' => $apiResponse]);
 		return $apiResponse;
-	}
-
-	/**
-	 * Request token.
-	 *
-	 * @param null $username
-	 * @param null $password
-	 * @return Response
-	 */
-	public function requestToken($username, $password) {
-		$apiResponse = $this->client
-			->setMethod('POST')
-			->setUri($this->baseUrl . '/oauth')
-			->setHeaders(['Accept' => 'application/json'])
-			->setParameterPost([
-				'grant_type' => 'password',
-				'username' => $username,
-				'password' => $password,
-				'client_id' => self::CLIENT_ID,
-				'client_secret' => self::CLIENT_SECRET,
-			])
-			->send();
-
-		return $this->getEventManager()->trigger('do-request.post', $this, ['apiResponse' => $apiResponse])->last();
-	}
-
-	/**
-	 * GET request.
-	 *
-	 * @param $uri
-	 * @param $settings
-	 * @return \Zend\Http\Response
-	 */
-	public function get($uri, $settings = []) {
-		return $this->request($uri, $settings);
-	}
-
-	/**
-	 * POST request.
-	 *
-	 * @param $uri
-	 * @param $settings
-	 * @return Response
-	 */
-	public function post($uri, $settings = []) {
-		return $this->request($uri, array_merge([
-			'method' => 'POST'
-		], $settings));
-	}
-
-	/**
-	 * PUT request.
-	 *
-	 * @param $uri
-	 * @param $settings
-	 * @return mixed
-	 */
-	public function put($uri, $settings = []) {
-		return $this->request($uri, array_merge([
-			'method' => 'PUT'
-		], $settings));
-	}
-
-	/**
-	 * PATCH request.
-	 *
-	 * @param $uri
-	 * @param $settings
-	 * @return mixed
-	 */
-	public function patch($uri, $settings = []) {
-		return $this->request($uri, array_merge([
-			'method' => 'PATCH'
-		], $settings));
-	}
-
-	/**
-	 * DELETE request.
-	 *
-	 * @param $uri
-	 * @param $settings
-	 * @return mixed
-	 */
-	public function delete($uri, $settings = []) {
-		return $this->request($uri, array_merge([
-			'method' => 'DELETE'
-		], $settings));
 	}
 }

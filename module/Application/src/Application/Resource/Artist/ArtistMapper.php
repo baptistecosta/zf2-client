@@ -20,8 +20,12 @@ class ArtistMapper extends AbstractMapper {
 	 * @return mixed
 	 */
 	public function get($id) {
-		$response = $this->getApiClient()->get('/artist/' . $id);
-		return json_decode($response->getBody(), true);
+//		$response = $this->getApiClient()->get('/artist/' . $id);
+
+		$clientRequest = $this->getRequestManager()->get('/artist/' . $id);
+		$apiResponse = $this->getApiClient()->send($clientRequest);
+
+		return json_decode($apiResponse->getBody(), true);
 	}
 
 	public function getAll(array $requestParams = []) {

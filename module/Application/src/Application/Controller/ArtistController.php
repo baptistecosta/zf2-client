@@ -12,10 +12,6 @@ class ArtistController extends AbstractActionController {
 	use ArtistMapperGetterTrait;
 
 	public function indexAction() {
-
-		$requestManager = $this->getServiceLocator()->get('request-manager');
-		$request = $requestManager->get('/artist');
-
 		$artistCollection = $this->getArtistMapper()->getAll([
 			'query' => $this->params()->fromQuery()
 		]);

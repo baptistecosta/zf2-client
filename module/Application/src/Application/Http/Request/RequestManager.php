@@ -3,6 +3,7 @@
 namespace Application\Http\Request;
 
 
+use Zend\Http\Headers;
 use Zend\Http\Request;
 use Zend\Stdlib\Parameters;
 
@@ -28,22 +29,23 @@ class RequestManager {
 
 	/**
 	 * @param string $resource
-	 * @param array $settings
+	 * @param array $params
 	 * @return Request
 	 */
-	public function build($resource, array $settings = []) {
+	public function build($resource, array $params = []) {
 		$request = new Request();
 		$request->setUri($this->baseUrl . $resource);
-		$request->setMethod(empty($settings['method']) ? 'GET' : $settings['method']);
-		if (!empty($settings['headers'])) {
-			$request->setHeaders($settings['headers']);
+		$request->setMethod(empty($params['method']) ? 'GET' : $params['method']);
+		if (!empty($params['headers'])) {
+			$request->getHeaders()->addHeaders($params['headers']);
 		}
-		if (!empty($settings['query'])) {
-			$params = new Parameters($settings['query']);
+		if (!empty($params['query'])) {
+			$params = new Parameters($params['query']);
 			$request->setQuery($params);
 		}
-		if (!empty($settings['post'])) {
-			$request->setPost($settings['post']);
+		if (!empty($params['post'])) {
+			$params = new Parameters($params['post']);
+			$request->setPost($params);
 		}
 		return $request;
 	}
@@ -51,63 +53,63 @@ class RequestManager {
 	/**
 	 * GET request.
 	 *
-	 * @param $uri
-	 * @param $settings
+	 * @param $resource
+	 * @param $params
 	 * @return Request
 	 */
-	public function get($uri, $settings = []) {
-		return $this->build($uri, $settings);
+	public function get($resource, $params = []) {
+		return $this->build($resource, $params);
 	}
 
 	/**
 	 * POST request.
 	 *
-	 * @param $uri
-	 * @param $settings
+	 * @param $resource
+	 * @param $params
 	 * @return Request
 	 */
-	public function post($uri, $settings = []) {
-		return $this->build($uri, array_merge([
+	public function post($resource, $params = []) {
+		return $this->build($resource, array_merge([
 			'method' => 'POST'
-		], $settings));
+		], $params));
 	}
 
 	/**
 	 * PUT request.
 	 *
-	 * @param $uri
-	 * @param $settings
+	 * @param $resource
+	 * @param $params
 	 * @return Request
 	 */
-	public function put($uri, $settings = []) {
-		return $this->build($uri, array_merge([
+	public function put($resource, $params = []) {
+		return $this->build($resource, array_merge([
 			'method' => 'PUT'
-		], $settings));
+		], $params));
 	}
 
 	/**
 	 * PATCH request.
 	 *
-	 * @param $uri
-	 * @param $settings
+	 * @param $resource
+	 * @param $params
 	 * @return Request
 	 */
-	public function patch($uri, $settings = []) {
-		return $this->build($uri, array_merge([
+	public function patch($resource, $params = []) {
+		return $this->build($resource, array_merge([
 			'method' => 'PATCH'
-		], $settings));
+		], $params));
 	}
 
 	/**
 	 * DELETE request.
 	 *
-	 * @param $uri
-	 * @param $settings
+	 * @param $resource
+	 * @param $params
 	 * @return Request
 	 */
-	public function delete($uri, $settings = []) {
-		return $this->build($uri, array_merge([
+	public function delete($resource, $params = []) {
+		return $this->build($resource, array_merge([
 			'method' => 'DELETE'
-		], $settings));
+		], $params));
 	}
 }

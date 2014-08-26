@@ -20,8 +20,6 @@ class ApiClientFactory implements FactoryInterface {
 		$client->setAdapter('Zend\\Http\\Client\\Adapter\\Curl');
 
 		$apiClient = new ApiClient();
-		return $apiClient
-			->setBaseUrl('http://apigility.loc')
-			->setClient($client);
+		return $apiClient->setClient($client);
 	}
 }

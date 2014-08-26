@@ -15,10 +15,4 @@ class IndexController extends AbstractActionController {
 	public function indexAction() {
 		return new ViewModel();
 	}
-
-	public function artistAction() {
-		return new ViewModel([
-			'artist' => $this->getArtistMapper()->get(1)
-		]);
-	}
 }
