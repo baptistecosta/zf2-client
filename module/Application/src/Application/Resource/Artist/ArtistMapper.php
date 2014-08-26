@@ -3,8 +3,8 @@
 namespace Application\Resource\Artist;
 
 
-use Application\Paginator\Adapter\ApigilityAdapter;
-use Application\Paginator\ApigilityPaginator;
+use Application\Paginator\Adapter\Adapter;
+use Application\Paginator\Paginator;
 use Application\Paginator\ScrollingStyle\Sliding;
 use Application\Resource\AbstractMapper;
 use Zend\Http\Response;
@@ -24,9 +24,12 @@ class ArtistMapper extends AbstractMapper {
 		return json_decode($response->getBody(), true);
 	}
 
-	public function getAll($requestSettings) {
-		$adapter = new ApigilityAdapter($this->getApiClient(), $requestSettings);
-		return new ApigilityPaginator($adapter, new Sliding());
+	public function getAll(array $requestParams = []) {
+		$adapter = new Adapter($this->getApiClient(), $requestParams);
+		$paginator = new Paginator($adapter, new Sliding());
+		$paginator->setCurrentPageNumber(empty($requestParams['query']['page']) ? 1 : $requestParams['query']['page']);
+		$paginator->setItemCountPerPage(empty($requestParams['query']['page_size']) ? 5 : $requestParams['query']['page_size']);
+		return $paginator;
 	}
 
 	public function delete() {

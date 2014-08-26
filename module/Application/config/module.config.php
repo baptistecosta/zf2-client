@@ -106,13 +106,15 @@ return [
 			'Application\\Resource\\AbstractMapperFactory'
 		],
 		'aliases' => [
-			'identity' => 'Application\\Session\\Container\\SessionIdentity',
 			'api-client' => 'Application\\Http\\Client\\ApiClient',
+			'identity' => 'Application\\Session\\Container\\SessionIdentity',
+			'request-manager' => 'Application\\Http\\Request\\Manager',
 			'translator' => 'MvcTranslator',
 		],
 		'factories' => [
 			'Application\\Session\\Container\\SessionIdentity' => 'Application\\Session\\Container\\SessionIdentityFactory',
 			'Application\\Http\\Client\\ApiClient' => 'Application\\Http\\Client\\ApiClientFactory',
+			'Application\\Http\\Request\\Manager' => 'Application\\Http\\Request\\RequestManagerFactory'
 		],
 		'invokables' => [
 			'Application\\Http\\Client\\ApiListener' => 'Application\\Http\\Client\\ApiClientListener',

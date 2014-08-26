@@ -2,36 +2,66 @@
 
 namespace Application\Paginator;
 
-use Application\Paginator\Adapter\ApigilityAdapter;
+use Application\Paginator\Adapter\Adapter;
 use ArrayIterator;
 use Countable;
 use IteratorAggregate;
-use Zend\Paginator\ScrollingStylePluginManager;
 
-class ApigilityPaginator implements Countable, IteratorAggregate {
+/**
+ * Class Paginator
+ *
+ * @package Application\Paginator
+ */
+class Paginator implements Countable, IteratorAggregate, PaginatorInterface {
 
 	/**
-	 * @var ApigilityAdapter $adapter
+	 * @var Adapter $adapter
 	 */
 	protected $adapter;
 
+	/**
+	 * The current page number.
+	 *
+	 * @var int
+	 */
 	protected $page;
 
+	/**
+	 * Nuùber of items per page.
+	 *
+	 * @var int
+	 */
 	protected $itemCountPerPage;
 
-	protected $queryParams;
-
+	/**
+	 * Number of pages.
+	 *
+	 * @var int
+	 */
 	protected $pageCount;
 
+	/**
+	 * The scrolling style used for pagination controller.
+	 */
 	protected $scrollingStyle;
 
+	/**
+	 * Number of local pages (i.e., the number of discrete page numbers
+	 * that will be displayed, including the current page number)
+	 *
+	 * @var int
+	 */
 	protected $pageRange = 10;
 
-	function __construct(ApigilityAdapter $adapter, $scrollingStyle) {
+	/**
+	 * @param Adapter $adapter
+	 * @param $scrollingStyle
+	 * @throws \Exception
+	 */
+	function __construct(Adapter $adapter, $scrollingStyle) {
 		$this->adapter = $adapter;
 		if (!$scrollingStyle) {
-			// TODO set a message.
-			throw new \Exception();
+			throw new \Exception("Scrolling style class is null.");
 		}
 		$this->scrollingStyle = $scrollingStyle;
 	}
@@ -80,7 +110,7 @@ class ApigilityPaginator implements Countable, IteratorAggregate {
 		$lowerBound = $this->normalizePageNumber($lowerBound);
 		$upperBound = $this->normalizePageNumber($upperBound);
 
-		$pages = array();
+		$pages = [];
 
 		for ($pageNumber = $lowerBound; $pageNumber <= $upperBound; $pageNumber++) {
 			$pages[$pageNumber] = $pageNumber;
@@ -95,7 +125,7 @@ class ApigilityPaginator implements Countable, IteratorAggregate {
 	 * @param  int $pageNumber
 	 * @return int
 	 */
-	public function normalizePageNumber($pageNumber) {
+	private function normalizePageNumber($pageNumber) {
 		$pageNumber = (int)$pageNumber;
 
 		if ($pageNumber < 1) {
@@ -111,8 +141,15 @@ class ApigilityPaginator implements Countable, IteratorAggregate {
 		return $pageNumber;
 	}
 
-	public function setPage($page) {
-		$this->page = $page;
+	/**
+	 * @return Adapter
+	 */
+	public function getAdapter() {
+		return $this->adapter;
+	}
+
+	public function setCurrentPageNumber($page) {
+		$this->page = (int)$page;
 	}
 
 	public function getCurrentPageNumber() {
@@ -140,23 +177,10 @@ class ApigilityPaginator implements Countable, IteratorAggregate {
 	}
 
 	public function getCurrentItemCount() {
-		return $this->adapter->getCurrentItemCount();
-	}
-
-	public function setQueryParams($queryParams) {
-		$this->queryParams = $queryParams;
-	}
-
-	public function getQueryParams() {
-		return $this->queryParams;
+		return $this->adapter->getItemCountInCurrentPage();
 	}
 
 	public function getRequestSettings() {
 		return $this->adapter->getRequestSettings();
-	}
-
-	public function getQuery() {
-		$requestSettings = $this->adapter->getRequestSettings();
-		return empty($requestSettings['query']) ? [] : $requestSettings['query'];
 	}
 }

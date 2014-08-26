@@ -77,11 +77,12 @@ class ApiClient implements ServiceLocatorAwareInterface, SessionIdentityAwareInt
 		if (!empty($settings['post'])) {
 			$apiRequest->setPost($settings['post']);
 		}
+		return $this->send($apiRequest);
+	}
 
-		$this->getEventManager()->trigger(self::EVENT_REQUEST_PRE, $this, ['apiRequest' => $apiRequest]);
-
-		$apiResponse = $this->client->send($apiRequest);
-
+	public function send(Request $request) {
+		$this->getEventManager()->trigger(self::EVENT_REQUEST_PRE, $this, ['apiRequest' => $request]);
+		$apiResponse = $this->client->send($request);
 		$this->getEventManager()->trigger(self::EVENT_REQUEST_POST, $this, ['apiResponse' => $apiResponse]);
 		return $apiResponse;
 	}

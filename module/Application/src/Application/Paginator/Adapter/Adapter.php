@@ -6,7 +6,7 @@ namespace Application\Paginator\Adapter;
 use Application\Http\Client\ApiClient;
 use Zend\Paginator\Adapter\AdapterInterface;
 
-class ApigilityAdapter implements AdapterInterface {
+class Adapter implements AdapterInterface {
 
 	/**
 	 * @var $client ApiClient
@@ -17,8 +17,18 @@ class ApigilityAdapter implements AdapterInterface {
 
 	protected $items;
 
+	/**
+	 * Total number of items in collection.
+	 *
+	 * @var int
+	 */
 	protected $totalItems = 0;
 
+	/**
+	 * Number of pages.
+	 *
+	 * @var int
+	 */
 	protected $pageCount = 0;
 
 	function __construct(ApiClient $client, array $requestSettings = []) {
@@ -68,11 +78,21 @@ class ApigilityAdapter implements AdapterInterface {
 		return $this->totalItems;
 	}
 
+	/**
+	 * Return the number of pages.
+	 *
+	 * @return int
+	 */
 	public function getPageCount() {
 		return $this->pageCount;
 	}
 
-	public function getCurrentItemCount() {
+	/**
+	 * Return the item count in the current page.
+	 *
+	 * @return int
+	 */
+	public function getItemCountInCurrentPage() {
 		return count($this->items);
 	}
 
@@ -81,14 +101,5 @@ class ApigilityAdapter implements AdapterInterface {
 	 */
 	public function getRequestSettings() {
 		return $this->requestSettings;
-	}
-
-	/**
-	 * @param array $requestSettings
-	 * @return $this
-	 */
-	public function setRequestSettings($requestSettings) {
-		$this->requestSettings = $requestSettings;
-		return $this;
 	}
 }

@@ -76,7 +76,7 @@ class Module implements BootstrapListenerInterface, ConfigProviderInterface, Aut
 	public function getViewHelperConfig() {
 		return [
 			'invokables' => [
-				'apigilityPaginationControl' => 'Application\\View\\Helper\\ApigilityPaginationControl'
+				'PaginationControl' => 'Application\\View\\Helper\\PaginationControl'
 			]
 		];
 	}

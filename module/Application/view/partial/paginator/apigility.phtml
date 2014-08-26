@@ -6,13 +6,13 @@
 			<span class="disabled">First</span> |
 		<?php } else { ?>
 			<?php $query['page'] = 1; ?>
-			<a href="<?= $this->url($this->route['name'], $query, ['query' => $query]); ?>">First</a> |
+			<a href="<?= $this->url($this->route, $query, ['query' => $query]); ?>">First</a> |
 		<?php } ?>
 
 		<!-- Previous page link -->
 		<?php if (isset($this->pages['previous'])) { ?>
 			<?php $query['page'] = $this->pages['previous']; ?>
-			<a href="<?= $this->url($this->route['name'], $query, ['query' => $query]); ?>">Previous</a> |
+			<a href="<?= $this->url($this->route, $query, ['query' => $query]); ?>">Previous</a> |
 		<?php } else { ?>
 			<span class="disabled">Previous</span> |
 		<?php } ?>
@@ -23,14 +23,14 @@
 				<?= $page; ?> |
 			<?php } else { ?>
 				<?php $query['page'] = $page; ?>
-				<a href="<?= $this->url($this->route['name'], $query, ['query' => $query]); ?>"><?= $page; ?></a> |
+				<a href="<?= $this->url($this->route, $query, ['query' => $query]); ?>"><?= $page; ?></a> |
 			<?php } ?>
 		<?php } ?>
 
 		<!-- Next page link -->
 		<?php if (isset($this->pages['next'])) { ?>
 			<?php $query['page'] = $this->pages['next']; ?>
-			<a href="<?= $this->url($this->route['name'], $query, ['query' => $query]); ?>">Next</a> |
+			<a href="<?= $this->url($this->route, $query, ['query' => $query]); ?>">Next</a> |
 		<?php } else { ?>
 			<span class="disabled">Next</span> |
 		<?php } ?>
@@ -40,7 +40,7 @@
 			<span class="disabled">Last</span>
 		<?php } else { ?>
 			<?php $query['page'] = $this->pages['last']; ?>
-			<a href="<?= $this->url($this->route['name'], $query, ['query' => $query]); ?>">Last</a>
+			<a href="<?= $this->url($this->route, $query, ['query' => $query]); ?>">Last</a>
 		<?php } ?>
 	</div>
 <?php } ?>
