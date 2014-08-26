@@ -22,7 +22,9 @@
 <table class="table">
 	<tr>
 		<th>ID</th>
-		<th>Name</th>
+		<th>
+			<a href="/artist?page=<?= $this->paginator->getCurrentPageNumber(); ?>&sort=name">Name</a>
+		</th>
 	</tr>
 	<?php foreach ($this->paginator as $artist) { ?>
 		<tr>
@@ -31,6 +33,7 @@
 		</tr>
 	<?php } ?>
 </table>
-<?php echo $this->apigilityPaginationControl($this->paginator, 'partial/paginator/apigility.phtml'); ?>
-
-<pre><?= json_encode($this->artists, JSON_PRETTY_PRINT); ?></pre>
+<?php echo $this->apigilityPaginationControl($this->paginator, 'partial/paginator/apigility.phtml', [
+	'name' => 'artist/default',
+	'params' => []
+]); ?>

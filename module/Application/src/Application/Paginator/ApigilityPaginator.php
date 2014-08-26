@@ -2,57 +2,161 @@
 
 namespace Application\Paginator;
 
+use Application\Paginator\Adapter\ApigilityAdapter;
 use ArrayIterator;
-use Traversable;
-use Zend\Paginator\Paginator;
+use Countable;
+use IteratorAggregate;
+use Zend\Paginator\ScrollingStylePluginManager;
 
-class ApigilityPaginator extends Paginator {
+class ApigilityPaginator implements Countable, IteratorAggregate {
 
-	public function getItemsByPage($pageNumber)
-	{
-		$pageNumber = $this->normalizePageNumber($pageNumber);
+	/**
+	 * @var ApigilityAdapter $adapter
+	 */
+	protected $adapter;
 
-		if ($this->cacheEnabled()) {
-			$data = static::$cache->getItem($this->_getCacheId($pageNumber));
-			if ($data) {
-				return $data;
-			}
+	protected $page;
+
+	protected $itemCountPerPage;
+
+	protected $queryParams;
+
+	protected $pageCount;
+
+	protected $scrollingStyle;
+
+	protected $pageRange = 10;
+
+	function __construct(ApigilityAdapter $adapter, $scrollingStyle) {
+		$this->adapter = $adapter;
+		if (!$scrollingStyle) {
+			// TODO set a message.
+			throw new \Exception();
 		}
-
-		$offset = ($pageNumber - 1) * $this->getItemCountPerPage();
-
-		$items = $this->adapter->getItems($offset, $this->getItemCountPerPage());
-		$this->pageCount = $this->_calculatePageCount();
-
-		$filter = $this->getFilter();
-
-		if ($filter !== null) {
-			$items = $filter->filter($items);
-		}
-
-		if (!$items instanceof Traversable) {
-			$items = new ArrayIterator($items);
-		}
-
-		if ($this->cacheEnabled()) {
-			$cacheId = $this->_getCacheId($pageNumber);
-			static::$cache->setItem($cacheId, $items);
-			static::$cache->setTags($cacheId, array($this->_getCacheInternalId()));
-		}
-
-		return $items;
+		$this->scrollingStyle = $scrollingStyle;
 	}
 
-	public function setItemCountPerPage($itemCountPerPage = -1)
-	{
-		$this->itemCountPerPage = (int) $itemCountPerPage;
-		if ($this->itemCountPerPage < 1) {
-			$this->itemCountPerPage = $this->getTotalItemCount();
-		}
-//		$this->pageCount        = $this->_calculatePageCount();
-		$this->currentItems     = null;
-		$this->currentItemCount = null;
-
-		return $this;
+	public function getIterator() {
+		$items = $this->adapter->getItems($this->page, $this->itemCountPerPage);
+		return new ArrayIterator($items);
 	}
-} 
+
+	public function count() {
+		return $this->adapter->count();
+	}
+
+	public function getPages() {
+		$pages = new \stdClass();
+		$pages->pageCount = $this->getPageCount();
+		$pages->itemCountPerPage = $this->getItemCountPerPage();
+		$pages->first = 1;
+		$pages->current = $this->page;
+		$pages->last = $this->getPageCount();
+
+		// Previous and next
+		if ($this->page - 1 > 0) {
+			$pages->previous = $this->page - 1;
+		}
+
+		if ($this->page + 1 <= $this->getPageCount()) {
+			$pages->next = $this->page + 1;
+		}
+
+		// Pages in range
+		$pages->pagesInRange = $this->scrollingStyle->getPages($this);
+		$pages->firstPageInRange = min($pages->pagesInRange);
+		$pages->lastPageInRange = max($pages->pagesInRange);
+
+		// Item numbers
+		$pages->currentItemCount = $this->getCurrentItemCount();
+		$pages->totalItemCount   = $this->count();
+		$pages->firstItemNumber  = (($this->page - 1) * $this->getItemCountPerPage()) + 1;
+		$pages->lastItemNumber   = $pages->firstItemNumber + $pages->currentItemCount - 1;
+
+		return $pages;
+	}
+
+	public function getPagesInRange($lowerBound, $upperBound) {
+		$lowerBound = $this->normalizePageNumber($lowerBound);
+		$upperBound = $this->normalizePageNumber($upperBound);
+
+		$pages = array();
+
+		for ($pageNumber = $lowerBound; $pageNumber <= $upperBound; $pageNumber++) {
+			$pages[$pageNumber] = $pageNumber;
+		}
+
+		return $pages;
+	}
+
+	/**
+	 * Brings the page number in range of the paginator.
+	 *
+	 * @param  int $pageNumber
+	 * @return int
+	 */
+	public function normalizePageNumber($pageNumber) {
+		$pageNumber = (int)$pageNumber;
+
+		if ($pageNumber < 1) {
+			$pageNumber = 1;
+		}
+
+		$pageCount = $this->count();
+
+		if ($pageCount > 0 && $pageNumber > $pageCount) {
+			$pageNumber = $pageCount;
+		}
+
+		return $pageNumber;
+	}
+
+	public function setPage($page) {
+		$this->page = $page;
+	}
+
+	public function getCurrentPageNumber() {
+		return $this->page;
+	}
+
+	public function setItemCountPerPage($itemCountPerPage) {
+		$this->itemCountPerPage = $itemCountPerPage;
+	}
+
+	public function getItemCountPerPage() {
+		return $this->itemCountPerPage;
+	}
+
+	public function getPageCount() {
+		return $this->adapter->getPageCount();
+	}
+
+	public function setPageRange($pageRange) {
+		$this->pageRange = $pageRange;
+	}
+
+	public function getPageRange() {
+		return $this->pageRange;
+	}
+
+	public function getCurrentItemCount() {
+		return $this->adapter->getCurrentItemCount();
+	}
+
+	public function setQueryParams($queryParams) {
+		$this->queryParams = $queryParams;
+	}
+
+	public function getQueryParams() {
+		return $this->queryParams;
+	}
+
+	public function getRequestSettings() {
+		return $this->adapter->getRequestSettings();
+	}
+
+	public function getQuery() {
+		$requestSettings = $this->adapter->getRequestSettings();
+		return empty($requestSettings['query']) ? [] : $requestSettings['query'];
+	}
+}

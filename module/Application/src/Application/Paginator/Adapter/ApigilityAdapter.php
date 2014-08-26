@@ -13,30 +13,38 @@ class ApigilityAdapter implements AdapterInterface {
 	 */
 	protected $client;
 
+	protected $requestSettings;
+
 	protected $items;
 
 	protected $totalItems = 0;
 
 	protected $pageCount = 0;
 
-	function __construct(ApiClient $client) {
+	function __construct(ApiClient $client, array $requestSettings = []) {
 		$this->client = $client;
+		$this->requestSettings = $requestSettings;
 	}
 
 	/**
 	 * Returns a collection of items for a page.
 	 *
-	 * @param  int $page Page offset
-	 * @param  int $itemCountPerPage Number of items per page
+	 * @param $page
+	 * @param $itemCountPerPage
+	 * @internal param array $queryParams
+	 * @internal param int $page Page offset
+	 * @internal param int $itemCountPerPage Number of items per page
 	 * @return array
 	 */
 	public function getItems($page, $itemCountPerPage) {
-//		$page = $this->getPage($page, $itemCountPerPage);
+		$query['page'] = $page;
+		$query['page_size'] = $itemCountPerPage;
+		if (!empty($this->requestSettings['query'])) {
+			$query = array_merge($this->requestSettings['query'], $query);
+		}
+
 		$response = $this->client->get('/artist', [
-			'query' => [
-				'page' => $page,
-				'page_size' => $itemCountPerPage
-			]
+			'query' => $query
 		]);
 		$body = json_decode($response->getBody(), true);
 
@@ -58,7 +66,6 @@ class ApigilityAdapter implements AdapterInterface {
 	 */
 	public function count() {
 		return $this->totalItems;
-//		return 5;
 	}
 
 	public function getPageCount() {
@@ -69,7 +76,19 @@ class ApigilityAdapter implements AdapterInterface {
 		return count($this->items);
 	}
 
-//	protected function getPage($offset, $itemCountPerPage) {
-//		return floor(($offset / $itemCountPerPage) + 1);
-//	}
+	/**
+	 * @return array
+	 */
+	public function getRequestSettings() {
+		return $this->requestSettings;
+	}
+
+	/**
+	 * @param array $requestSettings
+	 * @return $this
+	 */
+	public function setRequestSettings($requestSettings) {
+		$this->requestSettings = $requestSettings;
+		return $this;
+	}
 }

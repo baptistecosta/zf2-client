@@ -3,22 +3,24 @@
 namespace Application\Paginator\ScrollingStyle;
 
 
+use Application\Paginator\ApigilityPaginator;
+
 class Sliding {
 
 	/**
 	 * Returns an array of "local" pages given a page number and range.
 	 *
-	 * @param  Paginator $paginator
+	 * @param ApigilityPaginator $paginator
 	 * @param  int $pageRange (Optional) Page range
 	 * @return array
 	 */
-	public function getPages($paginator, $pageRange = null) {
-		if ($pageRange === null) {
+	public function getPages(ApigilityPaginator $paginator, $pageRange = null) {
+		if (!$pageRange) {
 			$pageRange = $paginator->getPageRange();
 		}
 
 		$pageNumber = $paginator->getCurrentPageNumber();
-		$pageCount = count($paginator);
+		$pageCount = $paginator->getPageCount();
 
 		if ($pageRange > $pageCount) {
 			$pageRange = $pageCount;

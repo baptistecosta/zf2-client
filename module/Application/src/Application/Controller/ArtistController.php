@@ -22,9 +22,22 @@ class ArtistController extends AbstractActionController {
 //		$paginator->setCurrentPageNumber((int)$page);
 //		$paginator->setItemCountPerPage($size);
 
-		$paginator = $this->getArtistMapper()->getAll($page, $size);
+//		$query = [];
+//		if ($order = $this->params()->fromQuery('order', null)) {
+//			$query['order'] = $order;
+//		}
+
+		$paginator = $this->getArtistMapper()->getAll([
+			'query' => $this->params()->fromQuery()
+		]);
 		$paginator->setPage((int)$page);
 		$paginator->setItemCountPerPage($size);
+
+//		$paginator->setPage((int)$page);
+//		$paginator->setItemCountPerPage($size);
+//		if ($order = $this->params()->fromQuery('order', null)) {
+//			$paginator->setOrder($order);
+//		}
 
 
 //		$apigilityAdapter = new ApigilityAdapter($this->getArtistMapper());

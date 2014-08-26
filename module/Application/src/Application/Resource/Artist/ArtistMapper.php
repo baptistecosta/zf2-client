@@ -5,11 +5,9 @@ namespace Application\Resource\Artist;
 
 use Application\Paginator\Adapter\ApigilityAdapter;
 use Application\Paginator\ApigilityPaginator;
-use Application\Paginator\ProtoApigilityPaginator;
 use Application\Paginator\ScrollingStyle\Sliding;
 use Application\Resource\AbstractMapper;
 use Zend\Http\Response;
-use Zend\Paginator\Paginator;
 
 /**
  * Class ArtistMapper
@@ -26,20 +24,9 @@ class ArtistMapper extends AbstractMapper {
 		return json_decode($response->getBody(), true);
 	}
 
-	public function getAll($page, $size) {
-//		$api = $this->getApiClient();
-//		$response = $api->get('/artist', [
-//			'query' => [
-//				'page' => $page,
-//				'page_size' => $size
-//			]
-//		]);
-//		return json_decode($response->getBody(), true);
-
-		$apigilityAdapter = new ApigilityAdapter($this->getApiClient());
-//		return new Paginator($apigilityAdapter);
-//		return new ApigilityPaginator($apigilityAdapter);
-		return new ProtoApigilityPaginator($apigilityAdapter, new Sliding());
+	public function getAll($requestSettings) {
+		$adapter = new ApigilityAdapter($this->getApiClient(), $requestSettings);
+		return new ApigilityPaginator($adapter, new Sliding());
 	}
 
 	public function delete() {
