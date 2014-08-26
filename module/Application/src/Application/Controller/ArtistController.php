@@ -22,6 +22,6 @@ class ArtistController extends AbstractActionController {
 
 	public function getAction() {
 		$artistData = $this->getArtistMapper()->get(1);
-		return new ViewModel(['data' => $artistData]);
+		return new ViewModel(['artistData' => $artistData]);
 	}
 }

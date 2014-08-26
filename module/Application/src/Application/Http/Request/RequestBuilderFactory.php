@@ -3,11 +3,10 @@
 namespace Application\Http\Request;
 
 
-
 use Zend\ServiceManager\FactoryInterface;
 use Zend\ServiceManager\ServiceLocatorInterface;
 
-class RequestManagerFactory implements FactoryInterface {
+class RequestBuilderFactory implements FactoryInterface {
 
 	/**
 	 * Create service
@@ -16,6 +15,6 @@ class RequestManagerFactory implements FactoryInterface {
 	 * @return mixed
 	 */
 	public function createService(ServiceLocatorInterface $serviceLocator) {
-		return new RequestManager('http://apigility.loc');
+		return new RequestBuilder('http://apigility.loc');
 	}
 }

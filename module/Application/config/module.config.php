@@ -109,13 +109,13 @@ return [
 		'aliases' => [
 			'api-client' => 'Application\\Http\\Client\\ApiClient',
 			'identity' => 'Application\\Session\\Container\\SessionIdentity',
-			'request-manager' => 'Application\\Http\\Request\\Manager',
+			'request-builder' => 'Application\\Http\\Request\\Builder',
 			'translator' => 'MvcTranslator',
 		],
 		'factories' => [
 			'Application\\Session\\Container\\SessionIdentity' => 'Application\\Session\\Container\\SessionIdentityFactory',
 			'Application\\Http\\Client\\ApiClient' => 'Application\\Http\\Client\\ApiClientFactory',
-			'Application\\Http\\Request\\Manager' => 'Application\\Http\\Request\\RequestManagerFactory'
+			'Application\\Http\\Request\\Builder' => 'Application\\Http\\Request\\RequestBuilderFactory'
 		],
 		'invokables' => [
 			'Application\\Http\\Client\\ApiListener' => 'Application\\Http\\Client\\ApiClientListener',

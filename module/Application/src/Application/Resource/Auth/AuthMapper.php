@@ -5,7 +5,6 @@ namespace Application\Resource\Auth;
 
 use Application\Http\Client\ApiClient;
 use Application\Resource\AbstractMapper;
-use Zend\Http\Client;
 use Zend\Http\Response;
 
 /**
@@ -22,7 +21,7 @@ class AuthMapper extends AbstractMapper {
 	public function requestToken($username, $password) {
 //		return $this->getApiClient()->requestToken($username, $password);
 
-		$req = $this->getRequestManager()->post('/oauth', [
+		$req = $this->getRequestBuilder()->post('/oauth', [
 			'headers' => [
 				'Content-Type' => 'application/x-www-form-urlencoded',
 				'Accept' => 'application/json'

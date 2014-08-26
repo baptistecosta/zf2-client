@@ -3,15 +3,14 @@
 namespace Application\Http\Request;
 
 
-use Zend\Http\Headers;
 use Zend\Http\Request;
 use Zend\Stdlib\Parameters;
 
 /**
- * Class RequestManager
+ * Class RequestBuilder
  * @package Application\Resource\Artist
  */
-class RequestManager {
+class RequestBuilder {
 
 	/**
 	 * Base URL (e.g: http://www.domain.com ).
