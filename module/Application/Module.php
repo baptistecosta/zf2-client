@@ -2,6 +2,7 @@
 
 namespace Application;
 
+use Application\Http\Client\ApiClientListener;
 use Zend\EventManager\EventInterface;
 use Zend\EventManager\EventManager;
 use Zend\ModuleManager\Feature\AutoloaderProviderInterface;
@@ -22,21 +23,26 @@ class Module implements BootstrapListenerInterface, ConfigProviderInterface, Aut
 		/** @var $services ServiceManager */
 		$services = $application->getServiceManager();
 
+		/** @var $eventManager EventManager */
 		$eventManager = $application->getEventManager();
 		$moduleRouteListener = new ModuleRouteListener();
 		$moduleRouteListener->attach($eventManager);
 
-		/** @var $apiClientEventManager EventManager */
-		$apiClientEventManager = $services->get('api-client')->getEventManager();
-		$apiClientEventManager->attachAggregate($services->get('Application\\Http\\Client\\ApiListener'));
+		/** @var ApiClientListener $listener */
+		$listener = $services->get('Application\\Http\\Client\\ApiListener');
+		$listener->setRequestFormatter($services->get('Application\\Http\\Request\\Formatter'));
+		$eventManager = $services->get('api-client')->getEventManager();
+		$eventManager->attachAggregate($listener);
 
-		/** @var $apiResponseHandlerEventManager EventManager */
-		$apiResponseHandlerEventManager = $services->get('Application\\Http\\Response\\ApiResponseHandler')->getEventManager();
-		$apiResponseHandlerEventManager->attachAggregate($services->get('Application\\Http\\Response\\Listener\\ClientError'));
-		$apiResponseHandlerEventManager->attachAggregate($services->get('Application\\Http\\Response\\Listener\\Forbidden'));
-		$apiResponseHandlerEventManager->attachAggregate($services->get('Application\\Http\\Response\\Listener\\NotFound'));
-		$apiResponseHandlerEventManager->attachAggregate($services->get('Application\\Http\\Response\\Listener\\Redirect'));
-		$apiResponseHandlerEventManager->attachAggregate($services->get('Application\\Http\\Response\\Listener\\ServerError'));
+		$eventManager = $services->get('Application\\Http\\Response\\ApiResponseHandler')->getEventManager();
+		$eventManager->attachAggregate($services->get('Application\\Http\\Response\\Listener\\ClientError'));
+		$eventManager->attachAggregate($services->get('Application\\Http\\Response\\Listener\\Forbidden'));
+		$eventManager->attachAggregate($services->get('Application\\Http\\Response\\Listener\\NotFound'));
+		$eventManager->attachAggregate($services->get('Application\\Http\\Response\\Listener\\Redirect'));
+		$eventManager->attachAggregate($services->get('Application\\Http\\Response\\Listener\\ServerError'));
+
+		$eventManager = $services->get('request-builder')->getEventManager();
+		$eventManager->attachAggregate($services->get('Application\\Http\\Request\\Listener'));
 	}
 
 	public function getConfig() {
@@ -44,14 +50,14 @@ class Module implements BootstrapListenerInterface, ConfigProviderInterface, Aut
 	}
 
 	public function getAutoloaderConfig() {
-		return array(
-			'Zend\Loader\StandardAutoloader' => array(
-				'namespaces' => array(
+		return [
+			'Zend\Loader\StandardAutoloader' => [
+				'namespaces' => [
 					__NAMESPACE__ => __DIR__ . '/src/' . __NAMESPACE__,
 					'SFA' => __DIR__ . '/../../vendor/sefaireaider/src/SFA'
-				),
-			),
-		);
+				],
+			],
+		];
 	}
 
 	public function getControllerConfig() {

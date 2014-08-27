@@ -19,8 +19,6 @@ class AuthMapper extends AbstractMapper {
 	 * @return Response
 	 */
 	public function requestToken($username, $password) {
-//		return $this->getApiClient()->requestToken($username, $password);
-
 		$req = $this->getRequestBuilder()->post('/oauth', [
 			'headers' => [
 				'Content-Type' => 'application/x-www-form-urlencoded',
@@ -38,7 +36,6 @@ class AuthMapper extends AbstractMapper {
 		$reqStr = $req->toString();
 
 		$apiResponse = $this->getApiClient()->send($req, false);
-//		$apiResponse = $this->getEventManager()->trigger('do-request.post', $this, ['apiResponse' => $apiResponse])->last();
 		return $apiResponse;
 	}
 }

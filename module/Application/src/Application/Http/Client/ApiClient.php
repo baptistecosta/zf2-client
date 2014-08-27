@@ -23,8 +23,8 @@ class ApiClient implements ServiceLocatorAwareInterface, SessionIdentityAwareInt
 	use ServiceLocatorAwareTrait;
 	use SessionIdentityAwareTrait;
 
-	const EVENT_REQUEST_PRE = 'request.pre';
-	const EVENT_REQUEST_POST = 'request.post';
+	const EVENT_SEND_PRE = 'send.pre';
+	const EVENT_SEND_POST = 'send.post';
 
 	const CLIENT_ID = 'sefaireaider-website';
 	const CLIENT_SECRET = '{7W5Vy?rxT;Ax9b';
@@ -43,12 +43,10 @@ class ApiClient implements ServiceLocatorAwareInterface, SessionIdentityAwareInt
 		return $this;
 	}
 
-	public function send(Request $request, $triggerPreEvent = true) {
-		if ($triggerPreEvent) {
-			$this->getEventManager()->trigger(self::EVENT_REQUEST_PRE, $this, ['apiRequest' => $request]);
-		}
+	public function send(Request $request) {
+		$this->getEventManager()->trigger(self::EVENT_SEND_PRE, $this, ['apiRequest' => $request]);
 		$apiResponse = $this->client->send($request);
-		$this->getEventManager()->trigger(self::EVENT_REQUEST_POST, $this, ['apiResponse' => $apiResponse]);
+		$this->getEventManager()->trigger(self::EVENT_SEND_POST, $this, ['apiResponse' => $apiResponse]);
 		return $apiResponse;
 	}
 }

@@ -4,6 +4,7 @@ namespace Application\View\Helper;
 
 use Application\Paginator\Paginator;
 use Exception;
+use Zend\Http\Request;
 use Zend\View\Helper\AbstractHelper;
 
 /**
@@ -29,13 +30,16 @@ class PaginationControl extends AbstractHelper {
 		}
 
 		$pages = get_object_vars($paginator->getPages());
-		$requestSettings = $paginator->getAdapter()->getRequestSettings();
+
+		/** @var Request $request */
+		$request = $paginator->getAdapter()->getRequest();
+		$query = $request->getQuery()->toArray();
 
 		$partialHelper = $this->view->plugin('partial');
 		return $partialHelper($partial, [
 			'pages' => $pages,
 			'route' => $route,
-			'query' => empty($requestSettings['query']) ? [] : $requestSettings['query']
+			'query' => $query
 		]);
 	}
 }

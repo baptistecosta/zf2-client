@@ -3,6 +3,8 @@
 namespace Application\Http\Request;
 
 
+use Zend\EventManager\EventManagerAwareInterface;
+use Zend\EventManager\EventManagerAwareTrait;
 use Zend\Http\Request;
 use Zend\Stdlib\Parameters;
 
@@ -10,7 +12,12 @@ use Zend\Stdlib\Parameters;
  * Class RequestBuilder
  * @package Application\Resource\Artist
  */
-class RequestBuilder {
+class RequestBuilder implements EventManagerAwareInterface {
+
+	use EventManagerAwareTrait;
+
+	const EVENT_SET_QUERY_PRE = 'set-query.pre';
+	const EVENT_BUILD_POST = 'build.post';
 
 	/**
 	 * Base URL (e.g: http://www.domain.com ).
@@ -35,17 +42,23 @@ class RequestBuilder {
 		$request = new Request();
 		$request->setUri($this->baseUrl . $resource);
 		$request->setMethod(empty($params['method']) ? 'GET' : $params['method']);
+
 		if (!empty($params['headers'])) {
 			$request->getHeaders()->addHeaders($params['headers']);
 		}
+
 		if (!empty($params['query'])) {
-			$params = new Parameters($params['query']);
-			$request->setQuery($params);
+			$query = $this->getEventManager()->trigger(self::EVENT_SET_QUERY_PRE, null, ['query' => $params['query']])->last();
+			$request->setQuery(new Parameters($query));
 		}
+
 		if (!empty($params['post'])) {
 			$params = new Parameters($params['post']);
 			$request->setPost($params);
 		}
+
+		$this->getEventManager()->trigger(self::EVENT_BUILD_POST, null, ['request' => $request]);
+
 		return $request;
 	}
 

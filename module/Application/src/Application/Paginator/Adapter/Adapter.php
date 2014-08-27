@@ -4,17 +4,24 @@ namespace Application\Paginator\Adapter;
 
 
 use Application\Http\Client\ApiClient;
+use Zend\Http\Request;
 use Zend\Paginator\Adapter\AdapterInterface;
 
 class Adapter implements AdapterInterface {
 
 	/**
-	 * @var $client ApiClient
+	 * @var ApiClient $client
 	 */
 	protected $client;
 
-	protected $requestSettings;
+	/**
+	 * @var Request $request
+	 */
+	protected $request;
 
+	/**
+	 * Items
+	 */
 	protected $items;
 
 	/**
@@ -31,9 +38,9 @@ class Adapter implements AdapterInterface {
 	 */
 	protected $pageCount = 0;
 
-	function __construct(ApiClient $client, array $requestSettings = []) {
+	function __construct(ApiClient $client, Request $request) {
 		$this->client = $client;
-		$this->requestSettings = $requestSettings;
+		$this->request = $request;
 	}
 
 	/**
@@ -47,15 +54,7 @@ class Adapter implements AdapterInterface {
 	 * @return array
 	 */
 	public function getItems($page, $itemCountPerPage) {
-		$query['page'] = $page;
-		$query['page_size'] = $itemCountPerPage;
-		if (!empty($this->requestSettings['query'])) {
-			$query = array_merge($this->requestSettings['query'], $query);
-		}
-
-		$response = $this->client->get('/artist', [
-			'query' => $query
-		]);
+		$response = $this->client->send($this->request);
 		$body = json_decode($response->getBody(), true);
 
 		$this->items = current($body['_embedded']);
@@ -99,7 +98,7 @@ class Adapter implements AdapterInterface {
 	/**
 	 * @return array
 	 */
-	public function getRequestSettings() {
-		return $this->requestSettings;
+	public function getRequest() {
+		return $this->request;
 	}
 }

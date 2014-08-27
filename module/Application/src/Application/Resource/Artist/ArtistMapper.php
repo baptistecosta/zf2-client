@@ -36,11 +36,13 @@ class ArtistMapper extends AbstractMapper {
 		return json_decode($apiResponse->getBody(), true);
 	}
 
-	public function getAll(array $requestParams = []) {
-		$adapter = new Adapter($this->getApiClient(), $requestParams);
+	public function getAll(array $params = []) {
+		$request = $this->getRequestBuilder()->get('/artist', ['query' => $params]);
+
+		$adapter = new Adapter($this->getApiClient(), $request);
 		$paginator = new Paginator($adapter, new Sliding());
-		$paginator->setCurrentPageNumber(empty($requestParams['query']['page']) ? 1 : $requestParams['query']['page']);
-		$paginator->setItemCountPerPage(empty($requestParams['query']['page_size']) ? 5 : $requestParams['query']['page_size']);
+		$paginator->setCurrentPageNumber(empty($params['page']) ? 1 : $params['page']);
+		$paginator->setItemCountPerPage(empty($params['page_size']) ? 5 : $params['page_size']);
 		return $paginator;
 	}
 

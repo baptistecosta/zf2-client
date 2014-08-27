@@ -12,11 +12,11 @@ class ArtistController extends AbstractActionController {
 	use ArtistMapperGetterTrait;
 
 	public function indexAction() {
-		$artistCollection = $this->getArtistMapper()->getAll([
-			'query' => $this->params()->fromQuery()
-		]);
+		$query = $this->params()->fromQuery();
+		$artistCollection = $this->getArtistMapper()->getAll($query);
 		return new ViewModel([
 			'artistCollection' => $artistCollection,
+			'query' => $query
 		]);
 	}
 

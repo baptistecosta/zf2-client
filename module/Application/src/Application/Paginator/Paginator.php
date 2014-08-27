@@ -181,6 +181,6 @@ class Paginator implements Countable, IteratorAggregate, PaginatorInterface {
 	}
 
 	public function getRequestSettings() {
-		return $this->adapter->getRequestSettings();
+		return $this->adapter->getRequest();
 	}
 }

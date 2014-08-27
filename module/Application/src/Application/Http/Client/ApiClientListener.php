@@ -6,11 +6,10 @@ namespace Application\Http\Client;
 use Application\Session\Container\SessionIdentityAwareInterface;
 use Application\Session\Container\SessionIdentityAwareTrait;
 use ArrayIterator;
+use Zend\EventManager\AbstractListenerAggregate;
 use Zend\EventManager\Event;
 use Zend\EventManager\EventManagerInterface;
-use Zend\EventManager\ListenerAggregateInterface;
 use Zend\Http\Header\Accept;
-use Zend\Http\Header\HeaderInterface;
 use Zend\Http\Headers;
 use Zend\Http\Request;
 use Zend\ServiceManager\ServiceLocatorAwareInterface;
@@ -20,29 +19,33 @@ use Zend\ServiceManager\ServiceLocatorAwareTrait;
  * Class ApiClientListener
  * @package Application\Http\Client
  */
-class ApiClientListener implements ListenerAggregateInterface, ServiceLocatorAwareInterface, SessionIdentityAwareInterface {
+class ApiClientListener extends AbstractListenerAggregate implements ServiceLocatorAwareInterface, SessionIdentityAwareInterface {
 
 	use ServiceLocatorAwareTrait;
 	use SessionIdentityAwareTrait;
 
-	protected $listeners = [];
+	protected $requestFormatter;
+
+	/**
+	 * @param mixed $requestFormatter
+	 */
+	public function setRequestFormatter($requestFormatter) {
+		$this->requestFormatter = $requestFormatter;
+	}
 
 	public function attach(EventManagerInterface $events) {
-		$this->listeners[] = $events->attach(ApiClient::EVENT_REQUEST_PRE, [$this, 'onRequestPre'], 1000);
-		$this->listeners[] = $events->attach(ApiClient::EVENT_REQUEST_POST, [$this, 'onRequestPost'], 1000);
-		$this->listeners[] = $events->attach('do-request.post', [$this, 'onDoRequestPost'], 1000);
-//		$this->listeners[] = $events->attach('request-forbidden', [$this, 'onRequestForbidden'], 50);
+		$this->listeners[] = $events->attach(ApiClient::EVENT_SEND_PRE, [$this, 'handleApiRequestHeaders'], 1000);
+		$this->listeners[] = $events->attach(ApiClient::EVENT_SEND_PRE, [$this, 'logRequest'], 10);
+
+		$this->listeners[] = $events->attach(ApiClient::EVENT_SEND_POST, [$this, 'handleApiResponse'], 1000);
 	}
 
-	public function detach(EventManagerInterface $events) {
-		foreach ($this->listeners as $index => $listener) {
-			if ($events->detach($listener)) {
-				unset($this->listeners[$index]);
-			}
-		}
-	}
-
-	public function onRequestPre(Event $e) {
+	/**
+	 * Handle API request header default behavior.
+	 *
+	 * @param Event $e
+	 */
+	public function handleApiRequestHeaders(Event $e) {
 		/** @var $apiRequest Request */
 		$apiRequest = $e->getParam('apiRequest');
 
@@ -78,12 +81,23 @@ class ApiClientListener implements ListenerAggregateInterface, ServiceLocatorAwa
 		return false;
 	}
 
-	public function onRequestPost(Event $e) {
-		$apiResponseHandler = $this->getServiceLocator()->get('Application\\Http\\Response\\ApiResponseHandler');
-		return $apiResponseHandler->process($e->getParam('apiResponse'));
+	/**
+	 * Format and log/dump the request.
+	 *
+	 * @param Event $e
+	 */
+	public function logRequest(Event $e) {
+		$apiRequest = $e->getParam('apiRequest');
+		var_dump($this->requestFormatter->process($apiRequest));
 	}
 
-	public function onDoRequestPost(Event $e) {
+	/**
+	 * Handle API response.
+	 *
+	 * @param Event $e
+	 * @return mixed
+	 */
+	public function handleApiResponse(Event $e) {
 		$apiResponseHandler = $this->getServiceLocator()->get('Application\\Http\\Response\\ApiResponseHandler');
 		return $apiResponseHandler->process($e->getParam('apiResponse'));
 	}
