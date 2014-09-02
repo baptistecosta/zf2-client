@@ -30,7 +30,6 @@ class Module implements BootstrapListenerInterface, ConfigProviderInterface, Aut
 
 		/** @var ApiClientListener $listener */
 		$listener = $services->get('Application\\Http\\Client\\ApiListener');
-		$listener->setRequestFormatter($services->get('Application\\Http\\Request\\Formatter'));
 		$eventManager = $services->get('api-client')->getEventManager();
 		$eventManager->attachAggregate($listener);
 
@@ -54,7 +53,6 @@ class Module implements BootstrapListenerInterface, ConfigProviderInterface, Aut
 			'Zend\Loader\StandardAutoloader' => [
 				'namespaces' => [
 					__NAMESPACE__ => __DIR__ . '/src/' . __NAMESPACE__,
-					'SFA' => __DIR__ . '/../../vendor/sefaireaider/src/SFA'
 				],
 			],
 		];

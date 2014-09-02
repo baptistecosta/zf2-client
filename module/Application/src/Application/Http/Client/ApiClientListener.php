@@ -24,18 +24,8 @@ class ApiClientListener extends AbstractListenerAggregate implements ServiceLoca
 	use ServiceLocatorAwareTrait;
 	use SessionIdentityAwareTrait;
 
-	protected $requestFormatter;
-
-	/**
-	 * @param mixed $requestFormatter
-	 */
-	public function setRequestFormatter($requestFormatter) {
-		$this->requestFormatter = $requestFormatter;
-	}
-
 	public function attach(EventManagerInterface $events) {
 		$this->listeners[] = $events->attach(ApiClient::EVENT_SEND_PRE, [$this, 'handleApiRequestHeaders'], 1000);
-		$this->listeners[] = $events->attach(ApiClient::EVENT_SEND_PRE, [$this, 'logRequest'], 10);
 
 		$this->listeners[] = $events->attach(ApiClient::EVENT_SEND_POST, [$this, 'handleApiResponse'], 1000);
 	}
@@ -79,16 +69,6 @@ class ApiClientListener extends AbstractListenerAggregate implements ServiceLoca
 			return ($accept->hasMediaType($mediaType));
 		}
 		return false;
-	}
-
-	/**
-	 * Format and log/dump the request.
-	 *
-	 * @param Event $e
-	 */
-	public function logRequest(Event $e) {
-		$apiRequest = $e->getParam('apiRequest');
-		var_dump($this->requestFormatter->process($apiRequest));
 	}
 
 	/**

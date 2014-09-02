@@ -127,7 +127,6 @@ return [
 			'Application\\Http\\Response\\Listener\\Redirect' => 'Application\\Http\\Response\\Listener\\RedirectListener',
 			'Application\\Http\\Response\\Listener\\ServerError' => 'Application\\Http\\Response\\Listener\\ServerErrorListener',
 			'Application\\Http\\Request\\Listener' => 'Application\\Http\\Request\\RequestBuilderListener',
-			'Application\\Http\\Request\\Formatter' => 'Application\\Http\\Request\\RequestFormatter'
 		],
 		'initializers' => [
 			'Application\\Session\\Container\\SessionIdentityInitializer'

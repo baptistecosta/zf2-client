@@ -1,6 +1,6 @@
 <?php
 
-namespace Application\Http\Request;
+namespace DebugPanel\Http\Request\Formatter;
 
 
 use Zend\Http\Headers;
@@ -8,12 +8,12 @@ use Zend\Http\Request;
 use Zend\Stdlib\Parameters;
 
 /**
- * Class RequestFormatter
- * @package Application\Http\Request
+ * Class StringFormatter
+ * @package DebugPanel\Http\Request
  */
-class RequestFormatter {
+class StringFormatter implements FormatterInterface {
 
-	public static function process(Request $request) {
+	public function run(Request $request) {
 		$dump = '';
 
 		$url = $request->getUriString();
